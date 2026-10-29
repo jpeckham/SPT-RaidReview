@@ -461,7 +461,7 @@ namespace RAID_REVIEW
                 // Fallback: try GetComponent directly on player's gameObject
                 if (_sainBotComponentType != null)
                 {
-                    var botComp = player.gameObject.GetComponent(_sainBotComponentType);
+                    var botComp = player.gameObject.GetComponent(Il2CppInterop.Runtime.Il2CppType.From(_sainBotComponentType));
                     if (botComp != null)
                     {
                         var result = ExtractDecisionFromBotComp(botComp);

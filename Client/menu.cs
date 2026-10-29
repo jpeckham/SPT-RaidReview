@@ -48,14 +48,14 @@ namespace RAID_REVIEW
                             AnimatedToggle childAnimatedToggle = child.GetComponent<AnimatedToggle>();
                             if (childAnimatedToggle != null)
                             {
-                                childAnimatedToggle.onValueChanged.AddListener((value) =>
+                                childAnimatedToggle.onValueChanged.AddListener(Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<bool>>((Action<bool>)((value) =>
                                 {
                                     if (value)
                                     {
                                         Application.OpenURL(RAID_REVIEW.RAID_REVIEW_HTTP_Server);
                                         childAnimatedToggle.isOn = false;
                                     }
-                                });
+                                })));
                             }
 
                             for (int subIndex = 0; subIndex < child.childCount; subIndex++)
