@@ -6,6 +6,22 @@ internal static class RecordingIdentity
 {
     internal static void Apply(Dictionary<string, object?> raid, string? username, IEnumerable<Dictionary<string, object?>> players)
     {
+        // Normalize response objects only, including historical/imported recordings.
+        // Keep the original database evidence intact.
+        var playerRows = players.ToArray();
+        foreach (var player in playerRows)
+        {
+            var role = player.GetValueOrDefault("type")?.ToString();
+            var side = player.GetValueOrDefault("team")?.ToString();
+            player["team"] = role switch
+            {
+                "PMC|USEC" => "Usec",
+                "PMC|BEAR" => "Bear",
+                _ => side switch { "1" => "Usec", "2" => "Bear", "4" => "Savage", _ => side }
+            };
+            if ((role == "PMC|USEC" || role == "PMC|BEAR") && player.GetValueOrDefault("mod_SAIN_brain")?.ToString() == "SCAV")
+                player["mod_SAIN_brain"] = "PMC";
+        }
         if (!string.IsNullOrEmpty(raid.GetValueOrDefault("importedAt")?.ToString()))
         {
             raid["profileName"] = raid.GetValueOrDefault("importedProfileName")?.ToString() ?? "";
@@ -13,7 +29,7 @@ internal static class RecordingIdentity
             return;
         }
         var headless = Regex.IsMatch(username ?? "", "^Headless_[0-9a-f]{24}$", RegexOptions.IgnoreCase);
-        var humans = players.Where(p => p.GetValueOrDefault("type")?.ToString() == "HUMAN").ToArray();
+        var humans = playerRows.Where(p => p.GetValueOrDefault("type")?.ToString() == "HUMAN").ToArray();
         var names = humans.Select(p => p.GetValueOrDefault("name")?.ToString())
             .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct().ToArray();
         raid["isHeadless"] = headless;

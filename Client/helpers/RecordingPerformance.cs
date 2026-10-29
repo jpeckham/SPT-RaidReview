@@ -8,9 +8,10 @@ namespace RAID_REVIEW
 {
     internal static class RecordingPerformance
     {
-        internal enum Stage { Capture, Ballistics, Loot, Kill, Airdrop, Sain, Switch }
-        private static readonly long[] calls = new long[7], ticks = new long[7], allocations = new long[7];
-        private static readonly double[] maxima = new double[7];
+        internal enum Stage { Capture, Ballistics, Loot, Kill, Airdrop, Sain, Switch, SpawnInventory, LooseLoot, Participant }
+        private static readonly int stageCount = Enum.GetValues(typeof(Stage)).Length;
+        private static readonly long[] calls = new long[stageCount], ticks = new long[stageCount], allocations = new long[stageCount];
+        private static readonly double[] maxima = new double[stageCount];
         private static readonly Func<long> allocated = OrderedPacketSender.ReadAllocatedBytes;
         private static long lastReport;
         private static int gc0, gc1, gc2;

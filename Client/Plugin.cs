@@ -2,7 +2,7 @@ using BepInEx;
 using BepInEx.Unity.IL2CPP;
 namespace RAID_REVIEW
 {
-    [BepInPlugin("ekky.raidreview", "Raid Review", "2.0.0")]
+    [BepInPlugin("ekky.raidreview", "Raid Review", "2.0.1")]
     [BepInDependency("com.sptushonka.core", "5.0.0")]
     [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.danw.questingbots", BepInDependency.DependencyFlags.SoftDependency)]

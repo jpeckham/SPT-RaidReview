@@ -8,7 +8,7 @@ public record ModMetadata : IModMetadata
     public string Name { get; init; } = "Raid Review";
     public string Author { get; init; } = "Ekky";
     public List<string>? Contributors { get; init; } = ["Chazu"];
-    public SemanticVersioning.Version Version { get; init; } = new("2.0.0");
+    public SemanticVersioning.Version Version { get; init; } = new("2.0.1");
     public SemanticVersioning.Range SptVersion { get; init; } = new("~5.0.0");
     public bool HasPrepatcher { get; init; } = false;
     public List<string>? Incompatibilities { get; init; }

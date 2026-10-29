@@ -22,6 +22,28 @@ class Program
 
     static async Task Main()
     {
+        foreach (var ai in new[] { false, true })
+        {
+            Telemetry.Packets.Clear();
+            var inventoryPlayer = new EFT.Player { ProfileId = ai ? "bot" : "human", IsAI = ai };
+            inventoryPlayer.Inventory.Items.Add(new EFT.InventoryLogic.Item());
+            SpawnInventoryRecorder.Capture(inventoryPlayer);
+            Check(Telemetry.Packets.Count == 1, "starting inventory must be recorded for humans as well as bots");
+            var inventory = (TrackingPlayerInventory)Telemetry.Packets.Single().Payload;
+            Check(inventory.profileId == inventoryPlayer.ProfileId && inventory.items.Single().price * inventory.items.Single().qty == 246,
+                "starting value retains owner, price and quantity");
+        }
+        Telemetry.Packets.Clear();
+        foreach (var (role, side) in new[] { ("PMC|USEC", EFT.EPlayerSide.Usec), ("PMC|BEAR", EFT.EPlayerSide.Bear) })
+        {
+            var original = new TrackingPlayer { team = EFT.EPlayerSide.Savage, type = role, mod_SAIN_brain = "SCAV" };
+            var snapshot = original.Snapshot();
+            var json = JObject.Parse(JsonConvert.SerializeObject(snapshot));
+            Check((string?)json["team"] == side.ToString(), "PMC role must override Savage runtime side and serialize as a named faction");
+            Check(snapshot.mod_SAIN_brain == "PMC", "PMC snapshot must not retain fallback SCAV label");
+            Check(original.team == EFT.EPlayerSide.Savage && original.mod_SAIN_brain == "SCAV", "snapshot normalization must not mutate captured source");
+        }
+
         foreach (var (x,z,yaw) in new[] { (0f,1f,0f), (1f,0f,90f), (0f,-1f,180f), (-1f,0f,270f), (1f,1f,45f), (-1f,1f,315f) })
         {
             Check(Math.Abs(BodyOrientation.FromForward(x,z,false)!.Value-yaw)<0.001f, "body forward has a signed full-circle yaw");

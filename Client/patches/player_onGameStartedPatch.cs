@@ -89,6 +89,8 @@ namespace RAID_REVIEW
                     };
                     RAID_REVIEW.trackingPlayers[newTrackingPlayer.profileId] = newTrackingPlayer;
                     Telemetry.SendSnapshot("PLAYER", newTrackingPlayer.Snapshot());
+                    // The main player is registered here, before the discovery loop.
+                    SpawnInventoryRecorder.Capture(RAID_REVIEW.myPlayer);
                 }
 
                 RAID_REVIEW.inRaid = true;

@@ -3,6 +3,24 @@ using RaidReview.PostRaid;
 
 var checks = 0;
 void Check(bool condition, string message) { checks++; if (!condition) throw new Exception(message); }
+foreach (var (role, side) in new[] { ("PMC|USEC", "Usec"), ("PMC|BEAR", "Bear") })
+{
+    var row = new Dictionary<string, object?> { ["team"] = "4", ["type"] = role, ["mod_SAIN_brain"] = "SCAV" };
+    RecordingIdentity.Apply(new(), "Test", new[] { row });
+    Check((string?)row["team"] == side && (string?)row["mod_SAIN_brain"] == "PMC", "legacy PMC rows display their role faction, not Savage fallback");
+}
+foreach (var (side, expected) in new[] { ("1", "Usec"), ("2", "Bear"), ("4", "Savage"), ("Usec", "Usec"), ("custom", "custom") })
+{
+    var row = new Dictionary<string, object?> { ["team"] = side, ["type"] = "HUMAN" };
+    RecordingIdentity.Apply(new(), "Test", new[] { row });
+    Check((string?)row["team"] == expected, "numeric legacy factions normalize without guessing unknown factions");
+}
+foreach (var role in new[] { "SANITAR GUARD|FOLLOWER", "KNIGHT|GOON", "SCAV|SCAV", "RAIDER|RAIDER" })
+{
+    var row = new Dictionary<string, object?> { ["team"] = "4", ["type"] = role, ["mod_SAIN_brain"] = "SCAV" };
+    RecordingIdentity.Apply(new(), "Test", new[] { row });
+    Check((string?)row["team"] == "Savage" && (string?)row["type"] == role, "guards and other non-PMC roles retain their categories");
+}
 var locale = new Dictionary<string,string>();
 var resolver = new ItemResolver(Path.Combine(Path.GetTempPath(), "rr-locale-test", "user", "mods", "RR"), new(), () => locale);
 Check(resolver.ResolveName("", "later") == "Unknown item (later)", "unknown is identified, not blank");

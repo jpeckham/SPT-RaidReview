@@ -27,10 +27,22 @@ namespace RAID_REVIEW
 
     public class TrackingPlayer
     {
-        public TrackingPlayer Snapshot() => (TrackingPlayer)MemberwiseClone();
+        public TrackingPlayer Snapshot()
+        {
+            var copy = (TrackingPlayer)MemberwiseClone();
+            // SPT 5 PMC bots can have Savage as their runtime side. Their role
+            // supplies the display faction; never change the native player's side.
+            if (type == "PMC|USEC" || type == "PMC|BEAR")
+            {
+                copy.team = type == "PMC|USEC" ? EPlayerSide.Usec : EPlayerSide.Bear;
+                if (copy.mod_SAIN_brain == "SCAV") copy.mod_SAIN_brain = "PMC";
+            }
+            return copy;
+        }
         public string sessionId { get; set; }
         public string profileId { get; set; }
         public int level { get; set; }
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public EPlayerSide team { get; set; }
         public string name { get; set; }
         public string type { get; set; }

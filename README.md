@@ -38,6 +38,13 @@ Start SPT's server and client normally. **F5** opens the review page; you can al
 
 To disable, close the client/server, remove or move the client RaidReview plugin folder, and move the server RaidReview folder outside `user/mods`. Preserve its data/config for future use. Restoring an older mod requires its matching client/server pair and your backup, not mixing versions.
 
+### 2.0.1 follow-up fixes and diagnostics
+
+- PMC display faction now follows known PMC roles even when SPT 5 reports Savage. Explicit enum string serialization and server response normalization also fix historical raid labels without rewriting database records. Boss guards remain Followers, matching upstream.
+- Starting inventory now includes the human player at raid start and other humans on discovery. Historical missing player spawn values cannot be recovered from later saves. Existing price/quantity and slot rules apply.
+- Sustained low FPS on Shoreline is **still under investigation**. Added separate performance stages for spawn inventory, loose loot, and participant sampling. Enable `Performance logging` to obtain `[RR-PERF]` reports every ten seconds; these include overlapping main-thread stages, managed allocations, and sender backlog. Native allocations are not included. The local installation has this enabled for diagnosis; no FPS improvement is claimed.
+- Regression suites: RecordingPipeline 1182, HeadlessPresentation 56, BehaviorDecisions 68, SwitchRecording 23, RaidTransfer 289, SQLiteIsolation 14 passed. Both builds passed with zero warnings/errors. Installed API verified nine historical PMCs corrected and four guards preserved; database player rows unchanged. Client startup/WebSocket passed. Human spawn capture and FPS require the next in-raid test.
+
 ### Port changes and verification
 
 - BepInEx 6 IL2CPP plugin entry point with an injected capture component and wrapped coroutine; updated patch namespace and plugin discovery. Retained optional dependency declarations.

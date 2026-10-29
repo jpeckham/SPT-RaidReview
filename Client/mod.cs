@@ -622,6 +622,7 @@ namespace RAID_REVIEW
         {
             if (_looseLootCaptured || gameWorld == null) return;
             _looseLootCaptured = true;
+            using var measurement = RecordingPerformance.Measure(RecordingPerformance.Stage.LooseLoot);
 
             try
             {
@@ -879,6 +880,7 @@ namespace RAID_REVIEW
                         }
                         foreach (Player player in allPlayers)
                         {
+                            using var participantMeasurement = RecordingPerformance.Measure(RecordingPerformance.Stage.Participant);
 
                             if (player == null)
                                 continue;
@@ -931,38 +933,7 @@ namespace RAID_REVIEW
                                 trackingPlayers[trackingPlayer.profileId] = trackingPlayer;
                                 _ = Telemetry.SendSnapshot("PLAYER", trackingPlayer.Snapshot());
 
-                                // Capture bot inventory at spawn
-                                if (player.IsAI)
-                                {
-                                    try
-                                    {
-                                        var invItems = new List<TrackingInventoryItem>();
-                                        foreach (var item in player.Inventory.GetPlayerItems(EPlayerItems.Equipment))
-                                        {
-                                            if (item == null) continue;
-                                            invItems.Add(new TrackingInventoryItem
-                                            {
-                                                templateId = item.TemplateId.ToString(),
-                                                itemName = item.LocalizedShortName(),
-                                                price = GetHandbookPrice(item),
-                                                qty = item.StackObjectsCount,
-                                                slot = item.Parent?.Container?.ID ?? "unknown"
-                                            });
-                                        }
-                                        if (invItems.Count > 0)
-                                        {
-                                            var invPayload = new TrackingPlayerInventory
-                                            {
-                                                sessionId = sessionId,
-                                                profileId = player.ProfileId,
-                                                time = stopwatch.ElapsedMilliseconds,
-                                                items = invItems
-                                            };
-                                            _ = Telemetry.SendSnapshot("PLAYER_INVENTORY", invPayload);
-                                        }
-                                    }
-                                    catch { }
-                                }
+                                SpawnInventoryRecorder.Capture(player);
 
                             }
 

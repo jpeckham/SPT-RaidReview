@@ -11,6 +11,8 @@ namespace EFT
         public IntPtr Pointer { get; } = new IntPtr(Interlocked.Increment(ref nextPointer));
         public string ProfileId, KillerId;
         public bool Destroyed;
+        public bool IsAI;
+        public InventoryLogic.Inventory Inventory = new();
         public Health HealthController = new();
         public void OnDead(EDamageType damage) { HealthController.IsAlive=false; }
         // Unity compares a destroyed component equal to null although its CLR reference survives.
@@ -49,6 +51,7 @@ namespace RAID_REVIEW
 {
     public static class RAID_REVIEW
     {
+        public static int GetHandbookPrice(EFT.InventoryLogic.Item item) => 123;
         public static bool CanCapture = true;
         public static string sessionId = "session";
         public static System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -57,6 +60,35 @@ namespace RAID_REVIEW
     {
         public static List<(string Action, object Payload)> Packets = new();
         public static bool SendSnapshot(string action, object payload) { Packets.Add((action,payload)); return true; }
+    }
+}
+namespace EFT.InventoryLogic
+{
+    public enum EPlayerItems { Equipment }
+    public class Container { public string ID = "Backpack"; }
+    public class Address { public Container Container = new(); }
+    public class Item
+    {
+        public string TemplateId = "template";
+        public int StackObjectsCount = 2;
+        public Address Parent = new();
+        public string LocalizedShortName() => "Test item";
+    }
+    public class Inventory
+    {
+        public List<Item> Items = new();
+        public IEnumerable<Item> GetPlayerItems(EPlayerItems selection) => Items;
+    }
+}
+namespace RAID_REVIEW
+{
+    internal static class LoggerInstance { internal static TestLog Log = new(); }
+    internal class TestLog { internal void LogWarning(string message) { } }
+    internal static class RecordingPerformance
+    {
+        internal enum Stage { SpawnInventory }
+        internal readonly struct Sample : IDisposable { public void Dispose() { } }
+        internal static Sample Measure(Stage stage) => new();
     }
 }
 namespace RaidReview
