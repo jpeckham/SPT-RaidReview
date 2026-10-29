@@ -32,3 +32,6 @@ ServerMod/public/
 /RELEASE_NOTES_v1.6.1.md
 /notes/
 /test/
+
+# Local staged client artifacts
+Client/Build/

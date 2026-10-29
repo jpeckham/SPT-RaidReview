@@ -92,7 +92,7 @@ namespace RAID_REVIEW
             if (!_QuestingBotsLoadedChecked)
             {
                 _QuestingBotsLoadedChecked = true;
-                _IsQuestingBotsLoaded = Chainloader.PluginInfos.ContainsKey("com.danw.questingbots");
+                _IsQuestingBotsLoaded = BepInEx.Unity.IL2CPP.IL2CPPChainloader.Instance.Plugins.ContainsKey("com.danw.questingbots");
             }
 
             return _IsQuestingBotsLoaded;

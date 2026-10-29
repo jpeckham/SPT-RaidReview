@@ -3,10 +3,12 @@ namespace EFT
 {
     public enum EPlayerSide { Savage = 4, Usec = 1, Bear = 2 }
     public enum ExitStatus { Survived, Killed }
-    public interface IPlayer { }
+    public interface IPlayer { T TryCast<T>() where T : class => this as T; }
     public class Health { public bool IsAlive = true; }
     public class Player : IPlayer
     {
+        private static long nextPointer;
+        public IntPtr Pointer { get; } = new IntPtr(Interlocked.Increment(ref nextPointer));
         public string ProfileId, KillerId;
         public bool Destroyed;
         public Health HealthController = new();
@@ -31,13 +33,13 @@ namespace EFT
     }
 }
 public enum EDamageType { Undefined, Landmine, Fall }
-public class LeaveBase { protected EFT.BotOwner bot; public LeaveBase(EFT.BotOwner bot) { this.bot=bot; } }
+public class LeaveBase { protected EFT.BotOwner bot { get; set; } public LeaveBase(EFT.BotOwner bot) { this.bot=bot; } }
 public class BotLeaveData : LeaveBase { public bool LeaveComplete; public BotLeaveData(EFT.BotOwner bot):base(bot) { } public void RemoveFromMap() { LeaveComplete=true; } }
 namespace EFT.HealthSystem { public class Unused { } }
 namespace BepInEx { public class Unused { } }
 namespace Comfort.Common { public class Unused { } }
 namespace UnityEngine { public struct Vector3 { public float x, y, z; public Vector3(float x, float y, float z) { this.x=x; this.y=y; this.z=z; } } }
-namespace SPT.Reflection.Patching
+namespace SPTushonka.Reflection.Patching
 {
     public abstract class ModulePatch { protected abstract System.Reflection.MethodBase GetTargetMethod(); }
     public class PatchPrefix : Attribute { }

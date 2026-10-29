@@ -1,3 +1,5 @@
+using BepInEx.Unity.IL2CPP.Configuration;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using EFT;
 using System;
 using System.Diagnostics;
@@ -22,13 +24,12 @@ using EFT.Interactive;
 
 namespace RAID_REVIEW
 {
-    [BepInPlugin("ekky.raidreview", "Raid Review", "1.9.0")]
-    [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("com.danw.questingbots", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("com.janky.phobos", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("com.chazut.orbit", BepInDependency.DependencyFlags.SoftDependency)]
-    public class RAID_REVIEW : BaseUnityPlugin
+
+    public class RAID_REVIEW : MonoBehaviour
     {
+        public RAID_REVIEW(IntPtr pointer) : base(pointer) { }
+        private BepInEx.Logging.ManualLogSource Logger => RaidReviewPlugin.Instance.Log;
+        private ConfigFile Config => RaidReviewPlugin.Instance.Config;
         // Framerate
         public static float PlayerTrackingInterval = 5f;
 
@@ -631,7 +632,7 @@ namespace RAID_REVIEW
                 {
                     try
                     {
-                        if (lootPoint is LootItem lootItem)
+                        if (lootPoint?.TryCast<LootItem>() is LootItem lootItem)
                         {
                             var item = lootItem.Item;
                             if (item == null) continue;
@@ -649,10 +650,10 @@ namespace RAID_REVIEW
                                 containerName = ""
                             });
                         }
-                        else if (lootPoint is LootableContainer container)
+                        else if (lootPoint?.TryCast<LootableContainer>() is LootableContainer container)
                         {
                             var rootItem = container.ItemOwner?.RootItem;
-                            if (rootItem is CompoundItem compound)
+                            if (rootItem?.TryCast<CompoundItem>() is CompoundItem compound)
                             {
                                 var pos = container.transform.position;
                                 var cName = "";
@@ -784,8 +785,14 @@ namespace RAID_REVIEW
 
             LoggerInstance.Log = Logger;
 
-            StartCoroutine(UpdateCoroutine());
+            StartCoroutine(UpdateCoroutine().WrapToIl2Cpp());
         }
+        public void Update()
+        {
+            if (LaunchWebpageKey != null && LaunchWebpageKey.Value.IsDown())
+                Application.OpenURL(RAID_REVIEW_HTTP_Server);
+        }
+
         IEnumerator UpdateCoroutine()
         {
             var interval = new WaitForSeconds(1.0f / PlayerTrackingInterval);
@@ -796,12 +803,6 @@ namespace RAID_REVIEW
 
                 try
                 {
-
-                    if (Input.GetKey(LaunchWebpageKey.Value.MainKey))
-                    {
-                        Application.OpenURL(RAID_REVIEW_HTTP_Server);
-
-                    }
 
                     // IF MAP NOT LOADED — check if raid ended without OnGameSessionEnd (headless)
                     if (!MapLoaded())
@@ -1236,7 +1237,7 @@ namespace RAID_REVIEW
 
         public static bool DetectMod(string modName)
         {
-            if (Chainloader.PluginInfos.ContainsKey(modName)) return true;
+            if (BepInEx.Unity.IL2CPP.IL2CPPChainloader.Instance.Plugins.ContainsKey(modName)) return true;
             return false;
         }
         // ISB SOF ships several plugins (ISBSpecialForces / ISBNotify / ISBSOF_Extras)
@@ -1244,7 +1245,7 @@ namespace RAID_REVIEW
         // GUID contains the substring instead of relying on one exact id.
         public static bool DetectModContaining(string substring)
         {
-            foreach (var key in Chainloader.PluginInfos.Keys)
+            foreach (var key in BepInEx.Unity.IL2CPP.IL2CPPChainloader.Instance.Plugins.Keys)
                 if (key.IndexOf(substring, System.StringComparison.OrdinalIgnoreCase) >= 0) return true;
             return false;
         }

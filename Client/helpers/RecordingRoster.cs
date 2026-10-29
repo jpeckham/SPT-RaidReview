@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using HarmonyLib;
 using EFT;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace RAID_REVIEW
 {
@@ -42,7 +42,7 @@ namespace RAID_REVIEW
         internal static void Depart(Player player)
         {
             if (player == null) return;
-            if (active.TryGetValue(player.ProfileId, out var current) && !ReferenceEquals(current, player)) return;
+            if (active.TryGetValue(player.ProfileId, out var current) && current.Pointer != player.Pointer) return;
             // Keep the last reference until capture records metadata and the terminal status.
             Add(player);
             departed.Add(player.ProfileId);
@@ -111,7 +111,7 @@ namespace RAID_REVIEW
         [PatchPostfix]
         private static void Postfix(IPlayer iPlayer)
         {
-            if (RAID_REVIEW.CanCapture && iPlayer is Player player) RecordingRoster.Add(player);
+            if (RAID_REVIEW.CanCapture && iPlayer?.TryCast<Player>() is Player player) RecordingRoster.Add(player);
         }
     }
     internal sealed class RecordingUnregisterPatch : ModulePatch
@@ -120,7 +120,7 @@ namespace RAID_REVIEW
         [PatchPrefix]
         private static void Prefix(IPlayer iPlayer)
         {
-            if (RAID_REVIEW.CanCapture && iPlayer is Player player) RecordingRoster.Depart(player);
+            if (RAID_REVIEW.CanCapture && iPlayer?.TryCast<Player>() is Player player) RecordingRoster.Depart(player);
         }
     }
     internal sealed class RecordingDeathPatch : ModulePatch
@@ -134,12 +134,12 @@ namespace RAID_REVIEW
     }
     internal sealed class RecordingExtractPatch : ModulePatch
     {
-        private static FieldInfo owner;
+        private static PropertyInfo owner;
         protected override MethodBase GetTargetMethod()
         {
             for (var type = typeof(BotLeaveData); type != null && owner == null; type = type.BaseType)
-                foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly))
-                    if (field.FieldType == typeof(BotOwner)) { owner = field; break; }
+                foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly))
+                    if (field.PropertyType == typeof(BotOwner)) { owner = field; break; }
             if (owner == null) throw new MissingFieldException("BotLeaveData owner");
             return typeof(BotLeaveData).GetMethod(nameof(BotLeaveData.RemoveFromMap));
         }

@@ -1,8 +1,8 @@
-﻿using EFT;
+using EFT;
 using EFT.UI;
 using Newtonsoft.Json;
 using RAID_REVIEW;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Linq;

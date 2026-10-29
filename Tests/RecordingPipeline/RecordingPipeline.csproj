@@ -15,6 +15,6 @@
     <Compile Include="../../ServerMod/WebSocket/WsPacketHandler.cs" Link="WsPacketHandler.cs" />
     <Compile Include="../../ServerMod/WebSocket/AirdropFlightPacket.cs" Link="AirdropFlightPacket.cs" />
     <Compile Include="../../ServerMod/WebSocket/SwitchStatesPacket.cs" Link="SwitchStatesPacket.cs" />
-    <Reference Include="Newtonsoft.Json"><HintPath>../../Client/dependencies/4.1.X/Newtonsoft.Json.dll</HintPath></Reference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>

@@ -61,7 +61,7 @@ namespace EFT {
 }
 namespace EFT.Interactive {
     public enum EDoorState { Shut, Open, Locked, Interacting }
-    public class WorldInteractiveObject { public string Id; public EDoorState DoorState; public event Action<WorldInteractiveObject,EDoorState,EDoorState> OnDoorStateChanged; public int Subscriptions => OnDoorStateChanged?.GetInvocationList().Length ?? 0; public void Set(EDoorState state) { var before=DoorState; DoorState=state; OnDoorStateChanged?.Invoke(this,before,state); } }
+    public class WorldInteractiveObject { public T TryCast<T>() where T : class => this as T; public string Id; public EDoorState DoorState; public event Action<WorldInteractiveObject,EDoorState,EDoorState> OnDoorStateChanged; public int Subscriptions => OnDoorStateChanged?.GetInvocationList().Length ?? 0; public void Set(EDoorState state) { var before=DoorState; DoorState=state; OnDoorStateChanged?.Invoke(this,before,state); } }
     public class Switch : WorldInteractiveObject { public string name="Switch"; public Transform transform=new(); public int GetInstanceID()=>GetHashCode(); }
     public class Transform { public Position position=new(); }
     public class Position { public float x=1,y=2,z=3; }

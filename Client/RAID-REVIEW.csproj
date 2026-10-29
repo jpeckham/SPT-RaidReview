@@ -1,112 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net472</TargetFramework>
-		<AssemblyName>RAID_REVIEW</AssemblyName>
-		<AssemblyTitle>RAID_REVIEW</AssemblyTitle>
-		<AssemblyDescription>A post raid review tool for SPT</AssemblyDescription>
-		<AssemblyCompany>EkkyLLC</AssemblyCompany>
-		<AssemblyProduct>RAID_REVIEW</AssemblyProduct>
-		<Version>1.9.0</Version>
-		<AssemblyVersion>1.9.0</AssemblyVersion>
-		<Copyright>2024 © Ekky</Copyright>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<OutputPath>C:\Games\SPT-4.1\BepInEx\plugins\</OutputPath>
-		<!-- Resolve references strictly from their HintPath. Without this, MSBuild's fallback search can
-		     silently pick the sibling dependencies\4.0.X copies (same simple names) over the 4.1.X ones. -->
-		<AssemblySearchPaths>{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<Optimize>False</Optimize>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<Reference Include="0Harmony">
-			<HintPath>dependencies\4.1.X\0Harmony.dll</HintPath>
-			<Private>false</Private>
-		  </Reference>
-		<Reference Include="spt-common">
-			<HintPath>dependencies\4.1.X\spt-common.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="spt-reflection">
-			<HintPath>dependencies\4.1.X\spt-reflection.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Assembly-CSharp">
-			<HintPath>dependencies\4.1.X\Assembly-CSharp.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="BepInEx">
-			<HintPath>dependencies\4.1.X\BepInEx.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Comfort">
-			<HintPath>dependencies\4.1.X\Comfort.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>dependencies\4.1.X\Newtonsoft.Json.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="BepInEx.Harmony.dll">
-			<HintPath>dependencies\4.1.X\BepInEx.Harmony.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="System.ComponentModel.DataAnnotations">
-		  <HintPath>dependencies\4.1.X\System.ComponentModel.DataAnnotations.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="System.Runtime" />
-		<Reference Include="UnityEngine">
-			<HintPath>dependencies\4.1.X\UnityEngine.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.AssetBundleModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.AssetBundleModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.CoreModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.AudioModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.AudioModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.InputModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.InputModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.InputLegacyModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.InputLegacyModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.UI">
-			<HintPath>dependencies\4.1.X\UnityEngine.UI.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.UIModule">
-			<HintPath>dependencies\4.1.X\UnityEngine.UIModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="websocket-sharp">
-			<HintPath>dependencies\4.1.X\websocket-sharp.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Sirenix.Serialization">
-			<HintPath>dependencies\4.1.X\Sirenix.Serialization.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<!-- ORBIT public telemetry API. Soft dependency at runtime — the
-		     Orbit_Integration class isolates all ORBIT-typed calls behind a
-		     Chainloader detection so the assembly is only loaded when ORBIT
-		     is installed. -->
-		<Reference Include="ORBIT">
-			<HintPath>dependencies\4.1.X\ORBIT.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>RAID_REVIEW</AssemblyName>
+    <RootNamespace>RAID_REVIEW</RootNamespace>
+    <Version>2.0.0</Version>
+    <Authors>Ekky;Chazut</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <LangVersion>latest</LangVersion>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-local</SPTPath>
+    <CorePath>$(SPTPath)/BepInEx/core</CorePath>
+    <InteropPath>$(SPTPath)/BepInEx/interop</InteropPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx.Unity.Common"><HintPath>$(CorePath)/BepInEx.Unity.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Core"><HintPath>$(CorePath)/BepInEx.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP"><HintPath>$(CorePath)/BepInEx.Unity.IL2CPP.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(CorePath)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(CorePath)/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(CorePath)/Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTushonka.Reflection"><HintPath>$(SPTPath)/BepInEx/plugins/sptushonka/SPTushonka.Reflection.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="$(InteropPath)/*.dll" Exclude="$(InteropPath)/Newtonsoft.Json.dll;$(InteropPath)/websocket-sharp.dll"><Private>false</Private></Reference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
+    <Compile Remove="tests/**/*.cs" />
+    <EmbeddedResource Remove="tests/**/*" />
+  </ItemGroup>
+  <Target Name="StagePlugin" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)Newtonsoft.Json.dll;$(TargetDir)websocket-sharp.dll;$(ProjectDir)../LICENSE" DestinationFolder="$(ProjectDir)Build/BepInEx/plugins/RaidReview" />
+  </Target>
 </Project>

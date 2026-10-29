@@ -1,5 +1,66 @@
 # SPT Raid Review
 
+## Local SPT 5.0 / EFT 48146 port
+
+Our [spt-5.0-48146 branch](https://github.com/jpeckham/SPT-RaidReview/tree/spt-5.0-48146) ports Chazut's 4.1.X commit `2567b3729437cf71248bcec607bdfb8f1393828e` (RaidReview 1.9.0) to the local SPT 5.0 installation. Client and server identify this experimental fork as **2.0.0**. No existing 5.0 port was found in the upstream branches/PRs or the two other listed forks checked. This is not an official release or a guarantee for other EFT builds.
+
+### Build this branch
+
+Requires .NET 10 SDK, Node/npm, and an initialized SPT 5.0 installation with generated IL2CPP assemblies for **EFT 1.2.5.0.48146**. From the repository root:
+
+```powershell
+npm --prefix Private ci --no-audit --no-fund
+npm --prefix Private run build
+dotnet build ServerMod/ServerMod.csproj -c Release -p:SkipDeploy=true `
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+dotnet build Client/RAID-REVIEW.csproj -c Release `
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+```
+
+The frontend must be built before the server because its assets are embedded in `RaidReview.dll`. The committed npm lockfile has been repaired: upstream's omitted esbuild platform entries initially made `npm ci` fail. Dependency installation uses that repaired lockfile. The server references SPT assemblies from the selected installation instead of the 4.1.2 NuGet packages; the client likewise references its core/interop assemblies. Game DLLs are not included in our changes.
+
+### Install, preserve data, and use
+
+Close the client/server and back up the test profile plus any existing RaidReview folders before updating. Copy the contents of `Client/Build/BepInEx/plugins/RaidReview` to the installation's `BepInEx/plugins/RaidReview`: `RAID_REVIEW.dll`, managed `Newtonsoft.Json.dll`, managed `websocket-sharp.dll`, and `LICENSE`. Do not substitute the game's native interop copies of those JSON/WebSocket libraries. Avoid duplicate older RaidReview plugin DLLs elsewhere.
+
+Deploy the server with the explicit destination:
+
+```powershell
+dotnet build ServerMod/ServerMod.csproj -c Release -p:SkipDeploy=false `
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local' `
+  '-p:SptModDirectory=C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime\user\mods\RaidReview'
+Copy-Item LICENSE 'C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime\user\mods\RaidReview'
+```
+
+Normal builds default to `SkipDeploy=true`. The deployment target preserves an existing config. Keep `data/` and `config/` when upgrading. Only the server mod DLL belongs at its root; SQLite managed dependencies stay in `lib/sqlite`, and the native provider stays under `runtimes/win-x64/native`. Do not copy the entire server build directory to the installed mod root.
+
+Start SPT's server and client normally. **F5** opens the review page; you can also browse to **http://127.0.0.1:7829** while the server is running. Recording uses WebSocket port **7828**. Client settings are in `BepInEx/config/ekky.raidreview.cfg`; server settings are in `SPT_Runtime/user/mods/RaidReview/config/config.json`. Recording defaults on. Server usage telemetry defaults off. Upstream defaults automatically keep the latest 30 raids and remove unfinished recordings; adjust the server config if you want different retention.
+
+To disable, close the client/server, remove or move the client RaidReview plugin folder, and move the server RaidReview folder outside `user/mods`. Preserve its data/config for future use. Restoring an older mod requires its matching client/server pair and your backup, not mixing versions.
+
+### Port changes and verification
+
+- BepInEx 6 IL2CPP plugin entry point with an injected capture component and wrapped coroutine; updated patch namespace and plugin discovery. Retained optional dependency declarations.
+- Native loot/switch/player casts, pointer-based player identity, native owner-property reflection, and the current shot shooter-profile API. Menu traversal uses indexed native children. F5 is checked once per frame to avoid repeated browser tabs from polling a held key.
+- Managed JSON/WebSocket dependencies packaged with the client. ORBIT API access is bound at runtime so building the plugin does not require ORBIT's Mono DLL; existing optional integrations are retained but **not validated against 5.0 versions**.
+- Server metadata targets SPT 5.0; storage implementation and isolated SQLite layout retained. No game/runtime component changes were required.
+
+Both .NET builds passed with **0 warnings and 0 errors**. The frontend passed TypeScript/Vite build, with the existing large-bundle warning. Six test suites passed: RecordingPipeline **1172**, BehaviorDecisions **68**, HeadlessPresentation **45**, SwitchRecording **23**, RaidTransfer **289**, and SqliteIsolation `alone` **14** checks. Recording/switch test doubles were updated for native wrapper boundaries; these are not substitutes for in-game recording tests.
+
+Run the first five using `dotnet run --project Tests/<suite> -c Release`. For storage:
+
+```powershell
+dotnet run --project Tests/SqliteIsolation -c Release -- alone `
+  "$PWD/ServerMod/bin/Release/RaidReview" `
+  'C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime'
+```
+
+Live startup confirmed all **17 patches**, the capture component, WebSocket connection, database initialization, frontend HTTP 200, and an empty `/api/raids` response. Tests used LocalBuildTest, with its save backed up; test processes were stopped afterward. Final whitespace-only cleanup was rebuilt after the last startup check.
+
+**Not established:** a completed raid captured/replayed end to end; correct positions, kills, loot, switches, airdrops, or Fika/AI-mod telemetry in gameplay; visual behavior of the optional menu button. Test a short raid before relying on recordings. No completed gameplay recording was claimed from these startup checks. Original 4.1 documentation below remains historical where it differs from this section.
+
+---
+
 **Raid Review 1.9.0**: [Full changelog](CHANGELOG.md)
 
 ![Stars](https://img.shields.io/github/stars/Chazut/SPT-RaidReview?style=flat-square&label=STARS&color=007ec6)

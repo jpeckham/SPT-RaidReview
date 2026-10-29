@@ -1,4 +1,4 @@
-﻿using EFT.UI;
+using EFT.UI;
 using BepInEx;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +10,7 @@ namespace RAID_REVIEW
 {
     public class MenuTaskbarMod : MonoBehaviour
     {
+        public MenuTaskbarMod(IntPtr pointer) : base(pointer) { }
 
         public static Boolean Insert(MenuTaskBar instance)
         {
@@ -32,8 +33,9 @@ namespace RAID_REVIEW
                     HoverTooltipArea tooltipArea = duplicatedToggleGroup.GetComponent<HoverTooltipArea>();
                     tooltipArea?.SetUnlockStatus(true);
 
-                    foreach (Transform child in duplicatedToggleGroup.transform)
+                    for (int childIndex = duplicatedToggleGroup.transform.childCount - 1; childIndex >= 0; childIndex--)
                     {
+                        var child = duplicatedToggleGroup.transform.GetChild(childIndex);
                         if (child.name == "NewInformation")
                         {
                             Destroy(child.gameObject);
@@ -56,8 +58,9 @@ namespace RAID_REVIEW
                                 });
                             }
 
-                            foreach (Transform subChild in child.transform)
+                            for (int subIndex = 0; subIndex < child.childCount; subIndex++)
                             {
+                                var subChild = child.GetChild(subIndex);
                                 if (subChild.name == "Text")
                                 {
                                     LocalizedText subChildEftText = subChild.GetComponent<LocalizedText>();

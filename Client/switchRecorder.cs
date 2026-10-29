@@ -40,7 +40,7 @@ namespace RAID_REVIEW
                     {
                         // LocationScene indexes arrays by their declared base
                         // type; querying Switch directly returns an empty set.
-                        if (!(obj is Switch sw) || sw == null || Tracked.ContainsKey(sw)) continue;
+                        if (!(obj?.TryCast<Switch>() is Switch sw) || sw == null || Tracked.ContainsKey(sw)) continue;
                         try
                         {
                             var entry = new State { Id = string.IsNullOrEmpty(sw.Id) ? "instance-" + sw.GetInstanceID() : sw.Id,
@@ -63,7 +63,7 @@ namespace RAID_REVIEW
 
         private static void Changed(WorldInteractiveObject obj, EDoorState before, EDoorState after)
         {
-            if (failed || !RAID_REVIEW.CanCapture || !(obj is Switch sw)) return;
+            if (failed || !RAID_REVIEW.CanCapture || !(obj?.TryCast<Switch>() is Switch sw)) return;
             using (RecordingPerformance.Measure(RecordingPerformance.Stage.Switch))
             {
                 try

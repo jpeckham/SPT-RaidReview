@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-local</SPTPath>
+    <SkipDeploy Condition="'$(SkipDeploy)' == ''">true</SkipDeploy>
     <RootNamespace>RaidReview</RootNamespace>
     <AssemblyName>RaidReview</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
-    <Version>1.9.0</Version>
+    <Version>2.0.0</Version>
     <OutputPath>bin\$(Configuration)\$(AssemblyName)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <!-- Copy NuGet runtime deps to output folder -->
@@ -16,9 +18,10 @@
 
   <ItemGroup>
     <!-- SPTarkov packages are already in the SPT server folder — don't copy them to the mod folder -->
-    <PackageReference Include="SPTarkov.Common" Version="4.1.2" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.DI" Version="4.1.2" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.1.2" ExcludeAssets="runtime" />
+    <Reference Include="SPTarkov.Common"><HintPath>$(SPTPath)/SPT_Runtime/SPTarkov.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTarkov.DI"><HintPath>$(SPTPath)/SPT_Runtime/SPTarkov.DI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTarkov.Server.Core"><HintPath>$(SPTPath)/SPT_Runtime/SPTarkov.Server.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SemanticVersioning"><HintPath>$(SPTPath)/SPT_Runtime/SemanticVersioning.dll</HintPath><Private>false</Private></Reference>
     <!-- SQLite — cross-platform bundle (e_sqlite3 works on Windows + Linux) -->
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.0" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />

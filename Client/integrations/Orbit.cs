@@ -1,10 +1,10 @@
 using EFT;
-using Orbit.Api;
+
 
 namespace RAID_REVIEW
 {
     /// <summary>
-    /// Direct consumer of the ORBIT public telemetry API (<see cref="OrbitTelemetry"/>).
+    /// Direct consumer of the ORBIT public telemetry API (<see cref="OrbitApiBridge"/>).
     /// Replaces the previous reflection-based integration — ORBIT now ships
     /// a stable API surface as part of its public DLL, and we link against
     /// it directly. Caller (mod.cs) must gate every entry point on
@@ -25,7 +25,7 @@ namespace RAID_REVIEW
         public static void InitReflection()
         {
             if (_apiReadyLogged) return;
-            if (!OrbitTelemetry.IsAvailable) return;
+            if (!OrbitApiBridge.IsAvailable) return;
             LoggerInstance.Log.LogInfo("RAID_REVIEW :::: ORBIT :::: API ready");
             _apiReadyLogged = true;
         }
@@ -73,7 +73,7 @@ namespace RAID_REVIEW
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static bool IsBotGhostInner(string profileId)
-            => OrbitTelemetry.IsBotDormant(profileId);
+            => OrbitApiBridge.IsBotDormant(profileId);
 
         /// <summary>Drains the simulated ghost fights resolved since the last call (null when none,
         /// or when the running ORBIT predates the 2.0 ghost API).</summary>
@@ -99,7 +99,7 @@ namespace RAID_REVIEW
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static System.Collections.Generic.List<TrackingOrbitGhostFight> GetGhostFightsInner(string sessionId, long time)
         {
-            var drained = OrbitTelemetry.DrainGhostFights();
+            var drained = OrbitApiBridge.DrainGhostFights();
             if (drained == null) return null;
             var list = new System.Collections.Generic.List<TrackingOrbitGhostFight>(drained.Count);
             foreach (var f in drained)
@@ -130,7 +130,7 @@ namespace RAID_REVIEW
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static System.Collections.Generic.List<TrackingOrbitGhostWake> GetGhostWakesInner(string sessionId, long time)
         {
-            var drained = OrbitTelemetry.DrainGhostWakes();
+            var drained = OrbitApiBridge.DrainGhostWakes();
             if (drained == null) return null;
             var now = UnityEngine.Time.realtimeSinceStartup;
             var result = new System.Collections.Generic.List<TrackingOrbitGhostWake>(drained.Count);
@@ -177,7 +177,7 @@ namespace RAID_REVIEW
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static System.Collections.Generic.List<TrackingOrbitGhostHearing> GetGhostHearingInner(string sessionId, long time)
         {
-            var drained = OrbitTelemetry.DrainGhostHearing();
+            var drained = OrbitApiBridge.DrainGhostHearing();
             if (drained == null) return null;
             var now = UnityEngine.Time.realtimeSinceStartup;
             var list = new System.Collections.Generic.List<TrackingOrbitGhostHearing>(drained.Count);
@@ -205,7 +205,7 @@ namespace RAID_REVIEW
         public static TrackingOrbitBotObjective GetBotObjectiveData(Player player, string sessionId, long time)
         {
             if (player == null || !player.IsAI) return null;
-            var data = OrbitTelemetry.GetBotObjective(player.ProfileId);
+            var data = OrbitApiBridge.GetBotObjective(player.ProfileId);
             if (data == null) return null;
 
             return new TrackingOrbitBotObjective
@@ -251,7 +251,7 @@ namespace RAID_REVIEW
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static TrackingOrbitField GetAdvectionFieldSnapshotInner(string sessionId, long time)
         {
-            var snap = OrbitTelemetry.GetFieldSnapshot();
+            var snap = OrbitApiBridge.GetFieldSnapshot();
             if (snap == null) return null;
 
             var advection = new System.Collections.Generic.List<TrackingOrbitCell>(snap.Advection.Count);
@@ -279,36 +279,36 @@ namespace RAID_REVIEW
         // Cache optional 2.2 fields once. Older ORBIT builds retain their existing main-objective API.
         private static class CampMainFields
         {
-            internal static readonly System.Reflection.FieldInfo Kill = typeof(OrbitMainObjective).GetField("KillAmbush");
-            internal static readonly System.Reflection.FieldInfo Started = typeof(OrbitMainObjective).GetField("CampStartedAt");
-            internal static readonly System.Reflection.FieldInfo Elapsed = typeof(OrbitMainObjective).GetField("CampElapsed");
-            internal static readonly System.Reflection.FieldInfo Duration = typeof(OrbitMainObjective).GetField("CampTargetDuration");
-            internal static readonly System.Reflection.FieldInfo UntilTimeExtract = typeof(OrbitMainObjective).GetField("CampUntilTimeExtract");
-            internal static readonly System.Reflection.FieldInfo ExtractRemaining = typeof(OrbitMainObjective).GetField("CampExtractRemainingSeconds");
-            internal static readonly System.Reflection.FieldInfo Holding = typeof(OrbitMainObjective).GetField("CampHolding");
-            internal static readonly System.Reflection.FieldInfo State = typeof(OrbitMainObjective).GetField("CampState");
-            internal static readonly System.Reflection.FieldInfo Failure = typeof(OrbitMainObjective).GetField("CampFailure");
-            internal static readonly System.Reflection.FieldInfo Attempt = typeof(OrbitMainObjective).GetField("CampSearchAttempt");
-            internal static readonly System.Reflection.FieldInfo Radius = typeof(OrbitMainObjective).GetField("CampSearchRadius");
+            internal static readonly System.Reflection.FieldInfo Kill = OrbitApiBridge.MainObjectiveType.GetField("KillAmbush");
+            internal static readonly System.Reflection.FieldInfo Started = OrbitApiBridge.MainObjectiveType.GetField("CampStartedAt");
+            internal static readonly System.Reflection.FieldInfo Elapsed = OrbitApiBridge.MainObjectiveType.GetField("CampElapsed");
+            internal static readonly System.Reflection.FieldInfo Duration = OrbitApiBridge.MainObjectiveType.GetField("CampTargetDuration");
+            internal static readonly System.Reflection.FieldInfo UntilTimeExtract = OrbitApiBridge.MainObjectiveType.GetField("CampUntilTimeExtract");
+            internal static readonly System.Reflection.FieldInfo ExtractRemaining = OrbitApiBridge.MainObjectiveType.GetField("CampExtractRemainingSeconds");
+            internal static readonly System.Reflection.FieldInfo Holding = OrbitApiBridge.MainObjectiveType.GetField("CampHolding");
+            internal static readonly System.Reflection.FieldInfo State = OrbitApiBridge.MainObjectiveType.GetField("CampState");
+            internal static readonly System.Reflection.FieldInfo Failure = OrbitApiBridge.MainObjectiveType.GetField("CampFailure");
+            internal static readonly System.Reflection.FieldInfo Attempt = OrbitApiBridge.MainObjectiveType.GetField("CampSearchAttempt");
+            internal static readonly System.Reflection.FieldInfo Radius = OrbitApiBridge.MainObjectiveType.GetField("CampSearchRadius");
         }
 
         private static class OperationFields
         {
-            internal static readonly System.Reflection.FieldInfo OperationId = typeof(OrbitMainObjective).GetField("OperationId");
-            internal static readonly System.Reflection.FieldInfo OperationName = typeof(OrbitMainObjective).GetField("OperationName");
-            internal static readonly System.Reflection.FieldInfo OperationStep = typeof(OrbitMainObjective).GetField("OperationStep");
-            internal static readonly System.Reflection.FieldInfo OperationStepIndex = typeof(OrbitMainObjective).GetField("OperationStepIndex");
-            internal static readonly System.Reflection.FieldInfo OperationStepCount = typeof(OrbitMainObjective).GetField("OperationStepCount");
-            internal static readonly System.Reflection.FieldInfo OperationState = typeof(OrbitMainObjective).GetField("OperationState");
+            internal static readonly System.Reflection.FieldInfo OperationId = OrbitApiBridge.MainObjectiveType.GetField("OperationId");
+            internal static readonly System.Reflection.FieldInfo OperationName = OrbitApiBridge.MainObjectiveType.GetField("OperationName");
+            internal static readonly System.Reflection.FieldInfo OperationStep = OrbitApiBridge.MainObjectiveType.GetField("OperationStep");
+            internal static readonly System.Reflection.FieldInfo OperationStepIndex = OrbitApiBridge.MainObjectiveType.GetField("OperationStepIndex");
+            internal static readonly System.Reflection.FieldInfo OperationStepCount = OrbitApiBridge.MainObjectiveType.GetField("OperationStepCount");
+            internal static readonly System.Reflection.FieldInfo OperationState = OrbitApiBridge.MainObjectiveType.GetField("OperationState");
         }
 
         private static class RushFields
         {
-            internal static readonly System.Reflection.FieldInfo Points = typeof(OrbitMainObjective).GetField("RushPoints");
+            internal static readonly System.Reflection.FieldInfo Points = OrbitApiBridge.MainObjectiveType.GetField("RushPoints");
             private static readonly System.Type PointType = Points?.FieldType.GetElementType();
             private static readonly System.Reflection.FieldInfo Id = PointType?.GetField("Id"), Name = PointType?.GetField("Name"), State = PointType?.GetField("State"),
                 X = PointType?.GetField("X"), Y = PointType?.GetField("Y"), Z = PointType?.GetField("Z"), Radius = PointType?.GetField("Radius"), Sequence = PointType?.GetField("Sequence");
-            internal static System.Collections.Generic.List<TrackingRushPoint> Read(OrbitMainObjective main)
+            internal static System.Collections.Generic.List<TrackingRushPoint> Read(dynamic main)
             {
                 var points = Points?.GetValue(main) as System.Array;
                 if (points == null) return null;
@@ -323,14 +323,14 @@ namespace RAID_REVIEW
 
         private static class AirdropFields
         {
-            internal static readonly System.Reflection.FieldInfo Stage = typeof(OrbitMainObjective).GetField("AirdropStage");
-            internal static readonly System.Reflection.FieldInfo Id = typeof(OrbitMainObjective).GetField("AirdropId");
-            internal static readonly System.Reflection.FieldInfo Landed = typeof(OrbitMainObjective).GetField("AirdropLanded");
+            internal static readonly System.Reflection.FieldInfo Stage = OrbitApiBridge.MainObjectiveType.GetField("AirdropStage");
+            internal static readonly System.Reflection.FieldInfo Id = OrbitApiBridge.MainObjectiveType.GetField("AirdropId");
+            internal static readonly System.Reflection.FieldInfo Landed = OrbitApiBridge.MainObjectiveType.GetField("AirdropLanded");
         }
 
         public static TrackingOrbitMainObjectives GetMainObjectivesSnapshot(string sessionId, long time)
         {
-            var snap = OrbitTelemetry.GetMainObjectivesSnapshot();
+            var snap = OrbitApiBridge.GetMainObjectivesSnapshot();
             if (snap == null) return null;
 
             var squads = new System.Collections.Generic.List<TrackingOrbitSquadMainObjectives>(snap.Count);
@@ -398,6 +398,6 @@ namespace RAID_REVIEW
         }
 
         // ORBIT bumps this whenever a squad main flips Completed.
-        public static int GetMainObjectivesRevision() => OrbitTelemetry.MainObjectivesRevision;
+        public static int GetMainObjectivesRevision() => OrbitApiBridge.MainObjectivesRevision;
     }
 }

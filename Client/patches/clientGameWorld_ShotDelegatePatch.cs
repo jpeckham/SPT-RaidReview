@@ -1,4 +1,4 @@
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
@@ -37,7 +37,7 @@ namespace RAID_REVIEW
                     var newTackingBallistic = new TrackingBallistic
                     {
                         sessionId = RAID_REVIEW.sessionId,
-                        profileId = shotResult.PlayerProfileID,
+                        profileId = shotResult.Player?.iPlayer?.ProfileId,
                         weaponId = shotResult.Weapon.Id,
                         weaponName = shotResult.Weapon.LocalizedShortName(),
                         ammoId = shotResult.Ammo.Id,
