@@ -1,8 +1,10 @@
+> Locked baseline: EFT **1.2.5.0.48146**, SPT 5.0. Newer EFT work must use a separate branch and installation. The original `spt-5.0-48146` branch remains available as historical provenance.
+
 # SPT Raid Review
 
 ## Local SPT 5.0 / EFT 48146 port
 
-Our [spt-5.0-48146 branch](https://github.com/jpeckham/SPT-RaidReview/tree/spt-5.0-48146) ports Chazut's 4.1.X commit `2567b3729437cf71248bcec607bdfb8f1393828e` (RaidReview 1.9.0) to the local SPT 5.0 installation. Client and server identify this experimental fork as **2.0.0**. No existing 5.0 port was found in the upstream branches/PRs or the two other listed forks checked. This is not an official release or a guarantee for other EFT builds.
+Our [spt-5.0-eft-1.2.5.0.48146 branch](https://github.com/jpeckham/SPT-RaidReview/tree/spt-5.0-eft-1.2.5.0.48146) ports Chazut's 4.1.X commit `2567b3729437cf71248bcec607bdfb8f1393828e` (RaidReview 1.9.0) to the local SPT 5.0 installation. Client and server identify this experimental fork as **2.0.0**. No existing 5.0 port was found in the upstream branches/PRs or the two other listed forks checked. This is not an official release or a guarantee for other EFT builds.
 
 ### Build this branch
 
@@ -12,9 +14,9 @@ Requires .NET 10 SDK, Node/npm, and an initialized SPT 5.0 installation with gen
 npm --prefix Private ci --no-audit --no-fund
 npm --prefix Private run build
 dotnet build ServerMod/ServerMod.csproj -c Release -p:SkipDeploy=true `
-  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146'
 dotnet build Client/RAID-REVIEW.csproj -c Release `
-  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146'
 ```
 
 The frontend must be built before the server because its assets are embedded in `RaidReview.dll`. The committed npm lockfile has been repaired: upstream's omitted esbuild platform entries initially made `npm ci` fail. Dependency installation uses that repaired lockfile. The server references SPT assemblies from the selected installation instead of the 4.1.2 NuGet packages; the client likewise references its core/interop assemblies. Game DLLs are not included in our changes.
@@ -27,9 +29,9 @@ Deploy the server with the explicit destination:
 
 ```powershell
 dotnet build ServerMod/ServerMod.csproj -c Release -p:SkipDeploy=false `
-  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local' `
-  '-p:SptModDirectory=C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime\user\mods\RaidReview'
-Copy-Item LICENSE 'C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime\user\mods\RaidReview'
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146' `
+  '-p:SptModDirectory=C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146\SPT_Runtime\user\mods\RaidReview'
+Copy-Item LICENSE 'C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146\SPT_Runtime\user\mods\RaidReview'
 ```
 
 Normal builds default to `SkipDeploy=true`. The deployment target preserves an existing config. Keep `data/` and `config/` when upgrading. Only the server mod DLL belongs at its root; SQLite managed dependencies stay in `lib/sqlite`, and the native provider stays under `runtimes/win-x64/native`. Do not copy the entire server build directory to the installed mod root.
@@ -59,7 +61,7 @@ Run the first five using `dotnet run --project Tests/<suite> -c Release`. For st
 ```powershell
 dotnet run --project Tests/SqliteIsolation -c Release -- alone `
   "$PWD/ServerMod/bin/Release/RaidReview" `
-  'C:\sptarkov\SPTarkov 5.0.0-local\SPT_Runtime'
+  'C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146\SPT_Runtime'
 ```
 
 Live startup confirmed all **17 patches**, the capture component, WebSocket connection, database initialization, frontend HTTP 200, and an empty `/api/raids` response. Tests used LocalBuildTest, with its save backed up; test processes were stopped afterward. Final whitespace-only cleanup was rebuilt after the last startup check.

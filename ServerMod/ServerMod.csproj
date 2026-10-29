@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-local</SPTPath>
+    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146</SPTPath>
     <SkipDeploy Condition="'$(SkipDeploy)' == ''">true</SkipDeploy>
     <RootNamespace>RaidReview</RootNamespace>
     <AssemblyName>RaidReview</AssemblyName>
